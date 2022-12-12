@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import Endpoints, { Collection } from "./endpoints";
+
+enum Screen {
+  ALL_COLLECTIONS,
+  COLLECTION,
+  UNSAVING,
+  UNSAVED,
+}
 
 const Popup = () => {
   const [count, setCount] = useState(0);
   const [currentURL, setCurrentURL] = useState<string>();
+
+  const [collections, setCollections] = useState<Collection[]>([]);
+
+
+  const endpoints = new Endpoints();
 
   useEffect(() => {
     chrome.action.setBadgeText({ text: count.toString() });
@@ -15,7 +28,13 @@ const Popup = () => {
     });
   }, []);
 
-  const changeBackground = () => {
+
+  const changeBackground = async () => {
+    const res = await endpoints.getCollections();
+
+    console.log("[UNSAVER POPUP LOL]", res);
+
+
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const tab = tabs[0];
       if (tab.id) {
