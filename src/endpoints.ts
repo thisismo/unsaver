@@ -4,20 +4,33 @@ export type Collection = {
     collection_name: string;
     collection_type: "MEDIA" | "ALL_MEDIA_AUTO_COLLECTION";
     cover_media_list: {
-        image_versions2: {
-            candidates: {
-                height: number;
-                width: number;
-                url: string;
-            }[]
-        }
+        image_versions2: Image2Versions;
     }[];
 }
 
-type CollectionResponse = {
+export type Image2Versions = {
+    candidates: Image[];
+}
+
+export type Image = {
+    height: number;
+    width: number;
+    url: string;
+}
+
+export type Media = {
+    media: {
+        id: string;
+        image_versions2: Image2Versions;
+    }
+}
+
+type CollectionResponse<T> = {
+    auto_load_more_enabled: boolean;
     status: string;
     more_available: boolean;
-    items:  Collection[];
+    items:  T[];
+    num_results?: number;
 }
 
 export default class Endpoints {
@@ -39,7 +52,7 @@ export default class Endpoints {
         };
     }
 
-    public async getCollections(): Promise<CollectionResponse> {
+    public async getCollections(): Promise<CollectionResponse<Collection>> {
         const response = await fetch('https://i.instagram.com/api/v1/collections/list/?collection_types=["ALL_MEDIA_AUTO_COLLECTION","MEDIA","AUDIO_AUTO_COLLECTION"]&include_public_only=0&get_cover_media_lists=true&max_id=',
         {
             method: 'GET',
@@ -48,7 +61,7 @@ export default class Endpoints {
         return await response.json();
     }
 
-    public async getCollectionMedia(collectionId: number | "ALL_MEDIA_AUTO_COLLECTION", maxId: string = ""): Promise<CollectionResponse> {
+    public async getCollectionMedia(collectionId: number | "ALL_MEDIA_AUTO_COLLECTION", maxId: string = ""): Promise<CollectionResponse<Media>> {
         const response = await fetch(`https://i.instagram.com/api/v1/collections/${collectionId}/media/?max_id=${maxId}`,
         {
             method: 'GET',
@@ -56,4 +69,6 @@ export default class Endpoints {
         });
         return await response.json();
     }
+
+    
 }
