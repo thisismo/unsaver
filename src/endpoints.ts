@@ -58,11 +58,23 @@ export default class Endpoints {
             method: 'GET',
             ...this.defaultOptions,
         });
+
+        if(response.status !== 200) throw new Error(`Failed to get collections. Status: ${response.status} ${response.statusText}`);
+
         return await response.json();
     }
 
-    public async getCollectionMedia(collectionId: number | "ALL_MEDIA_AUTO_COLLECTION", maxId: string = ""): Promise<CollectionResponse<Media>> {
+    public async getCollectionMedia(collectionId: number, maxId: string = ""): Promise<CollectionResponse<Media>> {
         const response = await fetch(`https://i.instagram.com/api/v1/feed/collection/${collectionId}/posts/?max_id=${maxId}`,
+        {
+            method: 'GET',
+            ...this.defaultOptions,
+        });
+        return await response.json();
+    }
+
+    public async getAllSavedMedia(maxId: string = ""): Promise<CollectionResponse<Media>> {
+        const response = await fetch(`https://i.instagram.com/api/v1/feed/saved/posts/?max_id=${maxId}`,
         {
             method: 'GET',
             ...this.defaultOptions,

@@ -1,6 +1,7 @@
 import React from 'react';
 import CollectionTile from '../components/CollectionTile';
 import Grid from '../components/Grid';
+import HeaderRow from '../components/HeaderRow';
 import { Collection } from '../endpoints';
 import ScreenContainer from './ScreenContainer';
 
@@ -11,7 +12,9 @@ type Props = {
 
 export default function CollectionsScreen({ collections, onSelectedCollectionChange }: Props) {
     return (
-        <ScreenContainer header={<h1>Your collections</h1>}>
+        <ScreenContainer header={
+            <HeaderRow left={<div></div>} center={<h1>Your collections</h1>}/>
+        }>
             <>
                 {
                     collections.length === 0 && <div>Loading...</div>
@@ -19,7 +22,7 @@ export default function CollectionsScreen({ collections, onSelectedCollectionCha
                 <Grid>
                     {
                         collections.map((collection) => (
-                            <CollectionTile collectionInfo={collection} onClick={
+                            <CollectionTile key={collection.collection_id} collectionInfo={collection} onClick={
                                 () => {
                                     onSelectedCollectionChange(collection);
                                 }

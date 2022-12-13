@@ -37,7 +37,9 @@ const Popup = () => {
         }}/>
       }
       {
-        selectedCollection !== null && <SelectionScreen collection={selectedCollection}/>
+        selectedCollection !== null && <SelectionScreen collection={selectedCollection} onBack={() => {
+          setSelectedCollection(null);
+        }}/>
       }
     </>
   );
