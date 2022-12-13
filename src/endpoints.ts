@@ -62,7 +62,7 @@ export default class Endpoints {
     }
 
     public async getCollectionMedia(collectionId: number | "ALL_MEDIA_AUTO_COLLECTION", maxId: string = ""): Promise<CollectionResponse<Media>> {
-        const response = await fetch(`https://i.instagram.com/api/v1/collections/${collectionId}/media/?max_id=${maxId}`,
+        const response = await fetch(`https://i.instagram.com/api/v1/feed/collection/${collectionId}/posts/?max_id=${maxId}`,
         {
             method: 'GET',
             ...this.defaultOptions,

@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import CollectionTile from "./components/CollectionTile";
 import Grid from "./components/Grid";
 import Endpoints, { Collection } from "./endpoints";
+import CollectionsScreen from "./screens/CollectionsScreen";
+import SelectionScreen from "./screens/SelectionScreen";
 
 enum Screen {
   ALL_COLLECTIONS,
@@ -27,27 +29,16 @@ const Popup = () => {
     setCollections(collections.items);
   }
 
-  if (collections.length === 0) return <div>Loading...</div>;
-
   return (
     <>
-      <h1>Your collections</h1>
-      <div style={{ minWidth: "400px" }}>
-        <Grid>
-          {
-            collections.map((collection) => (
-              <CollectionTile collectionInfo={collection} onClick={() => {
-                setSelectedCollection(collection);
-                alert(collection.collection_name);
-              }}/>
-            ))
-          }
-        </Grid>
-      </div>
-      <button onClick={() => refreshCollections}>
-        refresh
-      </button>
-      <button>change background</button>
+      {
+        selectedCollection === null && <CollectionsScreen collections={collections} onSelectedCollectionChange={(collection: Collection) => {
+          setSelectedCollection(collection);
+        }}/>
+      }
+      {
+        selectedCollection !== null && <SelectionScreen collection={selectedCollection}/>
+      }
     </>
   );
 };
