@@ -3,6 +3,7 @@ import Button from "../components/Button";
 import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
+import MediaTile from "../components/MediaTile";
 import Endpoints, { Collection, Media } from "../endpoints";
 import ScreenContainer from "./ScreenContainer";
 
@@ -13,17 +14,23 @@ type Props = {
 
 const endpoints = new Endpoints();
 
+export type SelectionType = false | true | "ALL";
+
 export default function SelectionScreen({ collection, onBack }: Props) {
     const [media, setMedia] = React.useState<Media[]>([]);
-    const [selecting, setSelecting] = React.useState<boolean>(false);
-    const [selectedMedia, setSelectedMedia] = React.useState<Media[] | "ALL">([]);
+    const [selecting, setSelecting] = React.useState<SelectionType>(false);
+    const [selectedMedia, setSelectedMedia] = React.useState<Media[]>([]);
 
     useEffect(() => {
         fetchMedia();
     }, []);
 
+    console.log("selectedMedia", selecting, selectedMedia);
 
     const fetchMedia = async () => {
+        if(collection.collection_id === "AUDIO_AUTO_COLLECTION") {
+            return;
+        }
         if (collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION") {
             const response = await endpoints.getAllSavedMedia();
             setMedia(response.items);
@@ -31,6 +38,20 @@ export default function SelectionScreen({ collection, onBack }: Props) {
         }
         const response = await endpoints.getCollectionMedia(collection.collection_id);
         setMedia(response.items);
+    };
+
+    const handleMediaClick = (media: Media) => {
+        console.log("media clicked", media);
+        if (!selecting) { //TODO: Option to open raw image or to download raw directly
+            //window.open(media.media.image_versions2.candidates[0].url);
+            window.open(`https://www.instagram.com/p/${media.code}`)
+            return;
+        }
+        if (selectedMedia.includes(media)) {
+            setSelectedMedia(selectedMedia.filter((m) => m !== media));
+            return;
+        }
+        setSelectedMedia([...selectedMedia, media]);
     };
 
     return (
@@ -44,9 +65,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
         } footer={
             <ButtonRow>
                 <Button onClick={() => {
-                    alert("you clicked me");
-                    setSelecting(true);
-                    setSelectedMedia("ALL");
+                    setSelecting("ALL");
                 }}>
                     Select All
                 </Button>
@@ -79,11 +98,22 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                 <Grid>
                     {
                         media.map((media) => (
-                            <img style={{
-                                maxWidth: "100%",
-                                maxHeight: "100%",
-                            }} src={media.media.image_versions2.candidates[3].url} crossOrigin="anonymous" decoding="auto"
-                                key={media.media.id} />
+                            <MediaTile
+                                key={media.id}
+                                media={media}
+                                onClick={handleMediaClick}
+                                selected={selecting === "ALL" && !selectedMedia.includes(media) || selecting !== "ALL" && selectedMedia.includes(media)}>
+                                {
+                                    !selecting && <h3>
+                                        Open image in new tab
+                                    </h3>
+                                }
+                                {
+                                    selecting && <h3>
+                                        I am selected
+                                    </h3>
+                                }
+                            </MediaTile>
                         ))
                     }
                 </Grid>

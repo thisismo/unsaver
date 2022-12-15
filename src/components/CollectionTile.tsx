@@ -7,7 +7,7 @@ type Props = {
 }
 
 export default function CollectionTile({ collectionInfo, onClick }: Props) {
-    const resolutionIndex = 7;
+    const resolutionIndex = 0;
 
     return (
         <div onClick={onClick} style={{
@@ -17,10 +17,11 @@ export default function CollectionTile({ collectionInfo, onClick }: Props) {
             cursor: "pointer",
         }}>
             {
-                collectionInfo.cover_media_list.map((media, i) => (
+                collectionInfo.cover_media_list?.map((media, i) => (
                     <img key={i} style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%"
+                        width: "100%",
+                        maxHeight: "100%",
+                        aspectRatio: "1",
                     }} src={media.image_versions2.candidates[resolutionIndex].url} crossOrigin="anonymous" decoding="auto" />
                 ))
             }
