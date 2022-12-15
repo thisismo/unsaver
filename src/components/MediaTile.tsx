@@ -1,5 +1,5 @@
 import React from "react";
-import { Media } from "../endpoints";
+import { Media, MediaInfo } from "../endpoints";
 
 type Props = {
     media: Media;
@@ -11,43 +11,57 @@ type Props = {
 
 export type FileType = "JPG" | "MP4";
 
-export const getMediaUrls = (media: Media, includeThumbnails = false): [string, FileType][] => {
+export const getMediaUrls = (media: Media, includeThumbnails = false): [MediaInfo[], FileType][] => {
     switch (media.media_type) {
         case 1:
-            return getMediaUrlsFromImage(media);
+            return [getMediaInfoForImage(media)];
         case 2:
-            return getMediaUrlsFromVideo(media, includeThumbnails);
+            return getMediaInfoForVideo(media, includeThumbnails);
         case 8:
-            return getMediaUrlsFromCarousel(media);
+            return getMediaInfoForCarousel(media);
         default:
             throw new Error("Unknown media type");
     }
 }
 
-const getMediaUrlsFromImage = (media: Media): [string, "JPG"][] => {
-    if (!("image_versions2" in media)) return [];
-
-    return [[media.image_versions2.candidates[0].url, "JPG"]];
+const getMediaInfoForImage = (media: Media): [MediaInfo[], "JPG"] => {
+    if (!("image_versions2" in media)) throw new Error("Media is not an image");
+    
+    return [media.image_versions2.candidates, "JPG"];
 }
 
-const getMediaUrlsFromVideo = (media: Media, includeThumbnails = false): [string, FileType][] => {
-    if (!("video_versions" in media)) return [];
+const getMediaInfoForVideo = (media: Media, includeThumbnails = false): [MediaInfo[], FileType][] => {
+    if (!("video_versions" in media)) throw new Error("Media is not a video");
 
-    return [[media.video_versions[0].url, "MP4"], ...(includeThumbnails ? getMediaUrlsFromImage(media) : [])];
+    return [[media.video_versions, "MP4"], ...(includeThumbnails ? [getMediaInfoForImage(media)] : [])];
 }
 
-const getMediaUrlsFromCarousel = (media: Media): [string, FileType][] => {
+const getMediaInfoForCarousel = (media: Media): [MediaInfo[], FileType][] => {
     if (!("carousel_media" in media)) return [];
 
     return media.carousel_media.map((m) => getMediaUrls(m)).flat();
 }
 
+export const getThumbnailUrl = (media: Media): string => {
+    let possibleThumbnails: MediaInfo[] = [];
+    switch (media.media_type) {
+        case 1:
+        case 2:
+            possibleThumbnails = getMediaInfoForImage(media)[0];
+            break;
+        case 8:
+            if ("carousel_media" in media) {
+                possibleThumbnails = getMediaInfoForImage(media.carousel_media[0])[0];
+            } else if ("image_versions2" in media) {
+                possibleThumbnails = getMediaInfoForImage(media)[0];
+            }
+    }
+
+    return possibleThumbnails[possibleThumbnails.length - 1].url;
+}
 
 export default function MediaTile({ media, selected, onClick, children, qualityIndex }: Props) {
     const [hovered, setHovered] = React.useState<boolean>(false);
-
-    //No need to load all the images, just the first one
-    const imgVersions = "image_versions2" in media ? media["image_versions2"] : media["carousel_media"][0]["image_versions2"];
 
     return (
         <div onClick={onClick?.bind(null, media)}
@@ -65,7 +79,7 @@ export default function MediaTile({ media, selected, onClick, children, qualityI
             <img style={{
                 maxWidth: "100%",
                 maxHeight: "100%",
-            }} src={imgVersions.candidates[0].url ?? getMediaUrls(media)[0]} crossOrigin="anonymous" decoding="auto"
+            }} src={getThumbnailUrl(media)} crossOrigin="anonymous" decoding="auto"
                 key={media.id} />
             {
                 (hovered || selected) && <div style={{

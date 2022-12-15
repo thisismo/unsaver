@@ -11,7 +11,7 @@ export default function Grid(props: Props) {
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
             justifyItems: "center",
-            gridGap: "10px",
+            gridGap: 10,
         }}>
             {props.children}
         </div>

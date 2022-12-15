@@ -14,8 +14,8 @@ export default function ButtonRow({ left, center, right, children }: Props) {
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
             alignItems: "center",
-            gap: 8,
-            marginBlock: 16,
+            gap: 10,
+            margin: 10,
         }}>
             {left}
             {center}

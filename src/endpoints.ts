@@ -3,16 +3,14 @@ export type Collection = {
     collection_media_count: number;
     collection_name: string;
     collection_type: "MEDIA" | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
-    cover_media_list?: {
-        image_versions2: Image2Versions;
-    }[];
+    cover_media_list?: Media[];
 }
 
 export type Image2Versions = {
-    candidates: Image[];
+    candidates: MediaInfo[];
 }
 
-export type Image = {
+export type MediaInfo = {
     height: number;
     width: number;
     url: string;
@@ -24,7 +22,7 @@ export type MediaEnvelope = {
 
 export type BaseMedia = {
     id: string;
-    code: string;
+    code?: string;
     media_type: number;
 };
 
@@ -39,11 +37,8 @@ export type VideoMedia = {
     video_versions: Video[];
 };
 
-export type Video = {
-    height: number;
-    width: number;
+export type Video = MediaInfo & {
     type: number;
-    url: string;
     id: string;
 };
 
@@ -115,8 +110,15 @@ export default class Endpoints {
         let json = await response.json();
         json["items"] = json.items.map((item: MediaEnvelope) => item.media);
         return json;
-
     }
+}
 
-
+async function* nextPagination<T>(getItems: (maxId: string) => Promise<CollectionResponse<T>>) {
+    let maxId = "";
+    while (true) {
+        const response = await getItems(maxId);
+        yield response.items;
+        if (!response.more_available) break;
+        maxId = response.next_max_id!;
+    }
 }

@@ -6,14 +6,23 @@ export type Props = {
     footer?: React.ReactNode;
 }
 
-export default function ScreenContainer({children, header, footer}: Props) {
+export default function ScreenContainer({ children, header, footer }: Props) {
     return (
-        <>
-        {header}
-        <div style={{ minWidth: "400px" }}>
-            {children}
+        <div style={{
+            display: "flex",
+            flexDirection: "column",
+            minWidth: "400px",
+            maxHeight: "600px"
+        }}>
+            <div style={{ justifySelf: "flex-start" }}>
+                {header}
+            </div>
+            <div style={{ flex: 1, overflowX: "hidden", overflowY: "scroll", paddingLeft: "10px"}}>
+                {children}
+            </div>
+            <div style={{ justifySelf: "flex-end" }}>
+                {footer}
+            </div>
         </div>
-        {footer}
-        </>
     );
 }

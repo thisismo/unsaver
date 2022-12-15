@@ -15,6 +15,7 @@ export default function HeaderRow({ left, center, right, children }: Props) {
             gridTemplateColumns: "1fr auto 1fr",
             alignItems: "center",
             gap: 8,
+            marginInline: 8,
         }}>
             {left}
             {center}

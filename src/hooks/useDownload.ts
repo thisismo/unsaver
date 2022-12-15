@@ -21,10 +21,10 @@ export const useDownload = (url: string, filename: string) => {
 export const doDownload = (media: Media, includeThumbnails = false) => {
     const urls = getMediaUrls(media, includeThumbnails);
 
-    urls.forEach(([url, fileType]) => {
+    urls.forEach(([mediaInfo, fileType]) => {
         const filename = `${media.code}.${fileType}`;
         chrome.downloads.download({
-            url,
+            url: mediaInfo[0].url,
             filename,
         });
     });

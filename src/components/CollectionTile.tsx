@@ -1,5 +1,6 @@
 import React from 'react';
 import { Collection } from '../endpoints';
+import { getThumbnailUrl } from './MediaTile';
 
 type Props = {
     collectionInfo: Collection;
@@ -15,14 +16,15 @@ export default function CollectionTile({ collectionInfo, onClick }: Props) {
             gridTemplateColumns: "repeat(2, 1fr)",
             position: "relative",
             cursor: "pointer",
+            aspectRatio: "1/1"
         }}>
             {
                 collectionInfo.cover_media_list?.map((media, i) => (
                     <img key={i} style={{
                         width: "100%",
                         maxHeight: "100%",
-                        aspectRatio: "1",
-                    }} src={media.image_versions2.candidates[resolutionIndex].url} crossOrigin="anonymous" decoding="auto" />
+                        aspectRatio: "1/1",
+                    }} src={getThumbnailUrl(media)} crossOrigin="anonymous" decoding="auto" />
                 ))
             }
             <div style={{
@@ -36,7 +38,7 @@ export default function CollectionTile({ collectionInfo, onClick }: Props) {
                 backgroundImage: "linear-gradient( to top, rgba(38, 38, 38, .6), rgba(255, 255, 255, 0) )",
                 alignItems: "flex-end",
                 color: "#fff",
-                paddingLeft: 8
+                paddingLeft: 8,
             }}>
                 <h3>{collectionInfo.collection_name}</h3>
             </div>
