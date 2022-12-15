@@ -114,7 +114,7 @@ export async function* collectionIterator<T>(getItems: (maxId: string, ...args: 
         console.log("Getting items with maxId: " + maxId);
         const response = await getItems(maxId);
         yield response.items;
-        if (response.more_available === false) break;
+        if (response.more_available == false) return;
         maxId = response.next_max_id!;
     }
 }

@@ -1,7 +1,7 @@
 //Chrome.downloads API Hook
 import { useState, useEffect } from 'react';
 import { getMediaUrls } from '../components/MediaTile';
-import { Media } from '../endpoints';
+import { Media } from '../networking/endpoints';
 
 export const useDownload = (url: string, filename: string) => {
     const [downloaded, setDownloaded] = useState(false);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Collection } from '../endpoints';
+import { Collection } from '../networking/endpoints';
 import { getThumbnailUrl } from './MediaTile';
 
 type Props = {

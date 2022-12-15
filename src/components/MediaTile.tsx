@@ -1,5 +1,5 @@
 import React from "react";
-import { Media, MediaInfo } from "../endpoints";
+import { Media, MediaInfo } from "../networking/endpoints";
 
 type Props = {
     media: Media;

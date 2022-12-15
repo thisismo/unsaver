@@ -4,9 +4,10 @@ import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
-import { Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media } from "../endpoints";
+import { Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media } from "../networking/endpoints";
 import { doDownload, useDownload } from "../hooks/useDownload";
 import ScreenContainer from "./ScreenContainer";
+import { SpinnerCircular } from "spinners-react";
 
 type Props = {
     collection: Collection;
@@ -36,8 +37,9 @@ export default function SelectionScreen({ collection, onBack }: Props) {
     const fetchMedia = async () => {
         setIsFetching(true);
         const response = await generator.next();
-        if (response.done) return;
-        setMedia([...media, ...response.value]);
+        if (!response.done) {
+            setMedia([...media, ...response.value]);
+        }
         setIsFetching(false);
     };
 
@@ -99,9 +101,6 @@ export default function SelectionScreen({ collection, onBack }: Props) {
             }
         >
             <>
-                {
-                    media.length === 0 && <div>Loading...</div>
-                }
                 <Grid>
                     {
                         media.map((media) => (
@@ -139,6 +138,16 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                         ))
                     }
                 </Grid>
+                <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "1rem",
+                }}>
+                    {
+                        isFetching && <SpinnerCircular color={"#4065dd"}/>
+                    }
+                </div>
             </>
         </ScreenContainer>
     )
