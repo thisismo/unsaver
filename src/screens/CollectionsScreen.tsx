@@ -23,7 +23,7 @@ export default function CollectionsScreen({ onSelectedCollection }: Props) {
         setIsFetching(true);
         const response = await generator.next();
         if (!response.done) {
-            setCollections([...collections, ...response.value]);
+            setCollections([...collections, ...response.value.filter((collection) => collection.collection_id !== "AUDIO_AUTO_COLLECTION")]);
         }
         setIsFetching(false);
     };
