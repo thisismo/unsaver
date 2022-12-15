@@ -4,7 +4,7 @@ import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
-import { bulkUnsaveMedia, Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia } from "../networking/endpoints";
+import { Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia, unsaveSelectedMedia } from "../networking/endpoints";
 import { doDownload, useIdentity } from "../hooks/hooks";
 import ScreenContainer from "./ScreenContainer";
 import { SpinnerCircular } from "spinners-react";
@@ -12,11 +12,12 @@ import { SpinnerCircular } from "spinners-react";
 type Props = {
     collection: Collection;
     onBack?: () => void;
+    onUnsave?: (unsaveGenerator: AsyncGenerator<string, void, unknown>, total: number) => void;
 }
 
 export type SelectionType = false | true | "ALL";
 
-export default function SelectionScreen({ collection, onBack }: Props) {
+export default function SelectionScreen({ collection, onBack, onUnsave }: Props) {
     const [media, setMedia] = React.useState<Media[]>([]);
     const [selecting, setSelecting] = React.useState<SelectionType>(false);
     const [selectedMedia, setSelectedMedia] = React.useState<Media[]>([]);
@@ -62,7 +63,18 @@ export default function SelectionScreen({ collection, onBack }: Props) {
     };
 
     const handleUnsave = async () => {
-        await unsaveMedia(selectedMedia[0].id, identity!);
+        const unsaveGenerator = unsaveSelectedMedia(selectedMedia.map(media => media.id), identity!, selecting === "ALL" ? collection.collection_id : undefined);
+        /*let count = 0;
+        let total = selecting === "ALL" ? collection.collection_media_count : selectedMedia.length;
+
+        while (true) {
+            const response = await unsaveGenerator.next();
+
+            if (response.done) break;
+            count++;
+            console.log(`Unsaved ${count}/${total} media`);
+        }*/
+        onUnsave?.(unsaveGenerator, selecting === "ALL" ? collection.collection_media_count : selectedMedia.length);
     };
 
     return (
@@ -98,7 +110,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                             </Button>
                         )
                     }
-                    <Button disabled={selectedMedia.length <= 0} onClick={handleUnsave}>
+                    <Button disabled={selectedMedia.length <= 0 && selecting !== "ALL"} onClick={handleUnsave}>
                         Unsave
                     </Button>
                 </ButtonRow>
@@ -149,7 +161,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                     padding: "1rem",
                 }}>
                     {
-                        isFetching && <SpinnerCircular color={"#4065dd"}/>
+                        isFetching && <SpinnerCircular color={"#4065dd"} />
                     }
                 </div>
             </>

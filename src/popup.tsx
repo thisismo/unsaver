@@ -34,7 +34,7 @@ const Popup = () => {
   return (
     <>
       {
-        selectedCollection === null && <CollectionsScreen onSelectedCollection={(collection: Collection) => {
+        selectedCollection === null && <CollectionsScreen onCollectionSelected={(collection: Collection) => {
           setSelectedCollection(collection);
         }} />
       }

@@ -123,18 +123,6 @@ export async function unsaveMedia(mediaId: string, csrftoken: string): Promise<v
     if (response.status !== 200) throw new Error(`Failed to unsave media. Status: ${response.status} ${response.statusText}`);
 }
 
-export async function bulkUnsaveMedia(mediaIds: string[]): Promise<void> {
-    const response = await fetch(`https://i.instagram.com/api/v1/media/unsave/`,
-        {
-            method: 'POST',
-            ...defaultOptions,
-            body: JSON.stringify({
-                media_ids: mediaIds
-            })
-        });
-    if (response.status !== 200) throw new Error(`Failed to bulk unsave media. Status: ${response.status} ${response.statusText}`);
-}
-
 export async function* collectionIterator<T>(getItems: (maxId: string, ...args: any[]) => Promise<CollectionResponse<T>>) {
     let maxId = "";
     while (true) {
@@ -144,4 +132,35 @@ export async function* collectionIterator<T>(getItems: (maxId: string, ...args: 
         if (response.more_available == false) return;
         maxId = response.next_max_id!;
     }
+}
+
+export async function* unsaveSelectedMedia(mediaIds: string[], csrftoken: string, collectionId?: string) {
+    //If collectionId is provided, it means we are unsaving all media from the collection except the ones in mediaIds
+    //If collectionId is not provided, it means we are just unsaving the media in mediaIds
+    //If collectionId is provided, we need to iterate through the collection to get all media
+
+    if (collectionId) {
+        for await (const media of collectionIterator(collectionId === "ALL_MEDIA_AUTO_COLLECTION" ?
+            getAllSavedMedia : getCollectionMedia.bind(null, collectionId))) {
+            for (const mediaItem of media) {
+                if (mediaIds.includes(mediaItem.id)) continue;
+                await unsaveMedia(mediaItem.id, csrftoken);
+                yield mediaItem.id;
+                await waitForMe(1000);
+            }
+        }
+        return;
+    }
+
+    for (const mediaId of mediaIds) {
+        await unsaveMedia(mediaId, csrftoken);
+        yield mediaId;
+        await waitForMe(1000);
+    }
+}
+
+function waitForMe(ms: number) {
+    return new Promise(resolve => {
+        setTimeout(() => { resolve('') }, ms);
+    })
 }

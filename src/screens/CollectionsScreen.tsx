@@ -7,10 +7,10 @@ import { Collection, collectionIterator, getCollections } from '../networking/en
 import ScreenContainer from './ScreenContainer';
 
 type Props = {
-    onSelectedCollection: (collection: Collection) => void;
+    onCollectionSelected: (collection: Collection) => void;
 }
 
-export default function CollectionsScreen({ onSelectedCollection }: Props) {
+export default function CollectionsScreen({ onCollectionSelected: onSelectedCollection }: Props) {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [isFetching, setIsFetching] = useState(false);
     const [generator, _] = React.useState(collectionIterator(getCollections));
