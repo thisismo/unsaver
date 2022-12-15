@@ -8,13 +8,16 @@ import ScreenContainer from './ScreenContainer';
 type Props = {
     collections: Collection[];
     onSelectedCollectionChange: (collection: Collection) => void;
+    onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
 }
 
-export default function CollectionsScreen({ collections, onSelectedCollectionChange }: Props) {
+export default function CollectionsScreen({ collections, onSelectedCollectionChange, onScroll }: Props) {
     return (
-        <ScreenContainer header={
-            <HeaderRow left={<div></div>} center={<h1>Your collections</h1>}/>
-        }>
+        <ScreenContainer
+            onScroll={onScroll}
+            header={
+                <HeaderRow left={<div></div>} center={<h1>Your collections</h1>} />
+            }>
             <>
                 {
                     collections.length === 0 && <div>Loading...</div>

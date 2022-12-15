@@ -4,9 +4,10 @@ export type Props = {
     children: React.ReactNode;
     header?: React.ReactNode;
     footer?: React.ReactNode;
+    onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
 }
 
-export default function ScreenContainer({ children, header, footer }: Props) {
+export default function ScreenContainer({ children, header, footer, onScroll }: Props) {
     return (
         <div style={{
             display: "flex",
@@ -17,7 +18,7 @@ export default function ScreenContainer({ children, header, footer }: Props) {
             <div style={{ justifySelf: "flex-start" }}>
                 {header}
             </div>
-            <div style={{ flex: 1, overflowX: "hidden", overflowY: "scroll", paddingLeft: "10px"}}>
+            <div onScroll={onScroll} style={{ flex: 1, overflowX: "hidden", overflowY: "scroll", paddingLeft: "10px"}}>
                 {children}
             </div>
             <div style={{ justifySelf: "flex-end" }}>

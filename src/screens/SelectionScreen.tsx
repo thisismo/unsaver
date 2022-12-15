@@ -4,7 +4,7 @@ import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
-import Endpoints, { Collection, Media } from "../endpoints";
+import { Collection, getAllSavedMedia, getCollectionMedia, Media } from "../endpoints";
 import { doDownload, useDownload } from "../hooks/useDownload";
 import ScreenContainer from "./ScreenContainer";
 
@@ -12,8 +12,6 @@ type Props = {
     collection: Collection;
     onBack?: () => void;
 }
-
-const endpoints = new Endpoints();
 
 export type SelectionType = false | true | "ALL";
 
@@ -35,11 +33,11 @@ export default function SelectionScreen({ collection, onBack }: Props) {
             return;
         }
         if (collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION") {
-            const response = await endpoints.getAllSavedMedia();
+            const response = await getAllSavedMedia();
             setMedia(response.items);
             return;
         }
-        const response = await endpoints.getCollectionMedia(collection.collection_id);
+        const response = await getCollectionMedia(collection.collection_id);
         setMedia(response.items);
     };
 

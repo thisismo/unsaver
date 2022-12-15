@@ -1,45 +1,47 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import CollectionTile from "./components/CollectionTile";
-import Grid from "./components/Grid";
-import Endpoints, { Collection } from "./endpoints";
+import { Collection, collectionIterator, getCollections } from "./endpoints";
 import CollectionsScreen from "./screens/CollectionsScreen";
 import SelectionScreen from "./screens/SelectionScreen";
 
-enum Screen {
-  ALL_COLLECTIONS,
-  COLLECTION,
-  UNSAVING,
-  UNSAVED,
-}
-
-const endpoints = new Endpoints();
+const generator = collectionIterator(getCollections);
 
 const Popup = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
-    refreshCollections();
+    fetchCollections();
   }, []);
 
-  const refreshCollections = async () => {
-    const collections = await endpoints.getCollections();
-    console.log("collections", collections);
-    setCollections(collections.items);
+  const fetchCollections = async () => {
+    setIsFetching(true);
+    const response = await generator.next("maxidfdsa");
+    if (response.done) return;
+    setCollections([...collections, ...response.value]);
+    setIsFetching(false);
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const target = e.target as HTMLDivElement;
+    if (isFetching) return;
+    if (target.scrollTop + target.clientHeight < target.scrollHeight * 4 / 5) return;
+
+    fetchCollections();
   }
 
   return (
     <>
       {
-        selectedCollection === null && <CollectionsScreen collections={collections} onSelectedCollectionChange={(collection: Collection) => {
+        selectedCollection === null && <CollectionsScreen onScroll={handleScroll} collections={collections} onSelectedCollectionChange={(collection: Collection) => {
           setSelectedCollection(collection);
-        }}/>
+        }} />
       }
       {
         selectedCollection !== null && <SelectionScreen collection={selectedCollection} onBack={() => {
           setSelectedCollection(null);
-        }}/>
+        }} />
       }
     </>
   );
