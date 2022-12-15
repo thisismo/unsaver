@@ -15,7 +15,8 @@
   },
 
   "permissions": [
-    "downloads"
+    "downloads",
+    "cookies"
   ],
 
   "host_permissions": [

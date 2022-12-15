@@ -1,7 +1,7 @@
 import React from "react";
 
 export type Props = {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     header?: React.ReactNode;
     footer?: React.ReactNode;
     onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;

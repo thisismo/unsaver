@@ -4,8 +4,8 @@ import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
-import { Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media } from "../networking/endpoints";
-import { doDownload, useDownload } from "../hooks/useDownload";
+import { bulkUnsaveMedia, Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia } from "../networking/endpoints";
+import { doDownload, useIdentity } from "../hooks/hooks";
 import ScreenContainer from "./ScreenContainer";
 import { SpinnerCircular } from "spinners-react";
 
@@ -22,7 +22,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
     const [selectedMedia, setSelectedMedia] = React.useState<Media[]>([]);
     const [isFetching, setIsFetching] = React.useState(false);
 
-    console.log("Selection Screen", collection.collection_id, collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION");
+    const identity = useIdentity();
 
     const [generator, _] = React.useState(collectionIterator(
         collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION" ?
@@ -61,6 +61,10 @@ export default function SelectionScreen({ collection, onBack }: Props) {
         setSelectedMedia([...selectedMedia, media]);
     };
 
+    const handleUnsave = async () => {
+        await unsaveMedia(selectedMedia[0].id, identity!);
+    };
+
     return (
         <ScreenContainer
             onScroll={handleScroll}
@@ -94,7 +98,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                             </Button>
                         )
                     }
-                    <Button disabled>
+                    <Button disabled={selectedMedia.length <= 0} onClick={handleUnsave}>
                         Unsave
                     </Button>
                 </ButtonRow>

@@ -56,7 +56,6 @@ type CollectionResponse<T> = {
     num_results?: number;
 }
 
-
 const defaultOptions: RequestInit = {
     headers: {
         "accept": "*/*",
@@ -64,7 +63,10 @@ const defaultOptions: RequestInit = {
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-site",
         "sec-gpc": "1",
-        "x-ig-app-id": "936619743392459"
+        "x-ig-app-id": "936619743392459",
+        "x-asbd-id": "198387",
+        "x-requested-with": "XMLHttpRequest",
+        //x-instagram-ajax: 1006746180
     },
     referrer: "https://www.instagram.com/",
     credentials: 'include',
@@ -79,6 +81,7 @@ export async function getCollections(maxId: string): Promise<CollectionResponse<
         {
             method: 'GET',
             ...defaultOptions,
+            redirect: 'error'
         });
 
     if (response.status !== 200) throw new Error(`Failed to get collections. Status: ${response.status} ${response.statusText}`);
@@ -106,6 +109,30 @@ export async function getAllSavedMedia(maxId: string = ""): Promise<CollectionRe
     let json = await response.json();
     json["items"] = json.items.map((item: MediaEnvelope) => item.media);
     return json;
+}
+
+export async function unsaveMedia(mediaId: string, csrftoken: string): Promise<void> {
+    const response = await fetch(`https://www.instagram.com/api/v1/web/save/${mediaId}/unsave/`,
+        {
+            method: 'POST',
+            ...defaultOptions,
+            headers: {
+                "x-csrftoken": csrftoken
+            }
+        });
+    if (response.status !== 200) throw new Error(`Failed to unsave media. Status: ${response.status} ${response.statusText}`);
+}
+
+export async function bulkUnsaveMedia(mediaIds: string[]): Promise<void> {
+    const response = await fetch(`https://i.instagram.com/api/v1/media/unsave/`,
+        {
+            method: 'POST',
+            ...defaultOptions,
+            body: JSON.stringify({
+                media_ids: mediaIds
+            })
+        });
+    if (response.status !== 200) throw new Error(`Failed to bulk unsave media. Status: ${response.status} ${response.statusText}`);
 }
 
 export async function* collectionIterator<T>(getItems: (maxId: string, ...args: any[]) => Promise<CollectionResponse<T>>) {
