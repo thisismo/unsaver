@@ -1,5 +1,5 @@
 export type Collection = {
-    collection_id: number | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
+    collection_id: string | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
     collection_media_count: number;
     collection_name: string;
     collection_type: "MEDIA" | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
@@ -86,7 +86,7 @@ export async function getCollections(maxId: string): Promise<CollectionResponse<
     return await response.json();
 }
 
-export async function getCollectionMedia(collectionId: number, maxId: string = ""): Promise<CollectionResponse<Media>> {
+export async function getCollectionMedia(collectionId: string, maxId: string): Promise<CollectionResponse<Media>> {
     const response = await fetch(`https://i.instagram.com/api/v1/feed/collection/${collectionId}/posts/?max_id=${maxId}`,
         {
             method: 'GET',
@@ -108,7 +108,7 @@ export async function getAllSavedMedia(maxId: string = ""): Promise<CollectionRe
     return json;
 }
 
-export async function* collectionIterator<T>(getItems: (maxId: string) => Promise<CollectionResponse<T>>) {
+export async function* collectionIterator<T>(getItems: (maxId: string, ...args: any[]) => Promise<CollectionResponse<T>>) {
     let maxId = "";
     while (true) {
         console.log("Getting items with maxId: " + maxId);
