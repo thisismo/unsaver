@@ -21,6 +21,11 @@ export default function MediaTile({ media, selected, onClick, children, qualityI
             style={{
                 position: "relative",
                 cursor: "pointer",
+                aspectRatio: "1/1",
+                //Center the image
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
             }}>
             <img style={{
                 maxWidth: "100%",
