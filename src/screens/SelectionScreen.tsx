@@ -3,8 +3,9 @@ import Button from "../components/Button";
 import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
-import MediaTile from "../components/MediaTile";
+import MediaTile, { getMediaUrls } from "../components/MediaTile";
 import Endpoints, { Collection, Media } from "../endpoints";
+import { doDownload, useDownload } from "../hooks/useDownload";
 import ScreenContainer from "./ScreenContainer";
 
 type Props = {
@@ -15,6 +16,8 @@ type Props = {
 const endpoints = new Endpoints();
 
 export type SelectionType = false | true | "ALL";
+
+const qualityIndex = 0;
 
 export default function SelectionScreen({ collection, onBack }: Props) {
     const [media, setMedia] = React.useState<Media[]>([]);
@@ -28,7 +31,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
     console.log("selectedMedia", selecting, selectedMedia);
 
     const fetchMedia = async () => {
-        if(collection.collection_id === "AUDIO_AUTO_COLLECTION") {
+        if (collection.collection_id === "AUDIO_AUTO_COLLECTION") {
             return;
         }
         if (collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION") {
@@ -42,11 +45,7 @@ export default function SelectionScreen({ collection, onBack }: Props) {
 
     const handleMediaClick = (media: Media) => {
         console.log("media clicked", media);
-        if (!selecting) { //TODO: Option to open raw image or to download raw directly
-            //window.open(media.media.image_versions2.candidates[0].url);
-            window.open(`https://www.instagram.com/p/${media.code}`)
-            return;
-        }
+        if(!selecting) return;
         if (selectedMedia.includes(media)) {
             setSelectedMedia(selectedMedia.filter((m) => m !== media));
             return;
@@ -104,9 +103,24 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                                 onClick={handleMediaClick}
                                 selected={selecting === "ALL" && !selectedMedia.includes(media) || selecting !== "ALL" && selectedMedia.includes(media)}>
                                 {
-                                    !selecting && <h3>
-                                        Open image in new tab
-                                    </h3>
+                                    !selecting && <div style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        flexDirection: "column",
+                                        height: "100%",
+                                    }}
+                                    onClick={() => {
+                                        window.open(`https://www.instagram.com/p/${media.code}`)
+                                    }}>
+                                        <h3>View on IG</h3>
+                                        <Button onClick={(e) => {
+                                            e.stopPropagation();
+                                            doDownload(media);
+                                        }}>
+                                            Download
+                                        </Button>
+                                    </div>
                                 }
                                 {
                                     selecting && <h3>

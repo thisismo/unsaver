@@ -22,11 +22,13 @@ export type MediaEnvelope = {
     media: Media;
 }
 
-export type Media = {
+export type BaseMedia = {
     id: string;
     code: string;
     media_type: number;
-} & (ImageMedia | VideoMedia | CarouselMedia);
+};
+
+export type Media = BaseMedia & (ImageMedia | VideoMedia | CarouselMedia);
 
 export type ImageMedia = {
     image_versions2: Image2Versions;
@@ -46,7 +48,7 @@ export type Video = {
 };
 
 export type CarouselMedia = {
-    carousel_media: (ImageMedia | VideoMedia)[];
+    carousel_media: (BaseMedia & ImageMedia | BaseMedia & VideoMedia)[];
     carousel_media_count: number;
 };
 

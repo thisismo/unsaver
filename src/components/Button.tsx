@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 type Props = {
     children: React.ReactNode;
     disabled?: boolean;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
 export default function Button({ onClick, children, disabled }: Props) {
@@ -16,9 +16,9 @@ export default function Button({ onClick, children, disabled }: Props) {
             onMouseLeave={() => setHovered(false)}
             onMouseDown={() => setPressed(true)}
             onMouseUp={() => setPressed(false)}
-            onClick={() => {
+            onClick={(e) => {
                 if (disabled !== true && onClick) {
-                    onClick();
+                    onClick(e);
                 }
             }} style={{
                 ...{
