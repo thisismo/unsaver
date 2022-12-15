@@ -17,7 +17,7 @@ const Popup = () => {
 
   const fetchCollections = async () => {
     setIsFetching(true);
-    const response = await generator.next("maxidfdsa");
+    const response = await generator.next();
     if (response.done) return;
     setCollections([...collections, ...response.value]);
     setIsFetching(false);
