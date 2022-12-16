@@ -40,7 +40,12 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
         <ScreenContainer
             onScroll={handleScroll}
             header={
-                <HeaderRow left={<div></div>} center={<h1>Your collections</h1>} />
+                <HeaderRow left={<div></div>} center={<h2>Your collections</h2>} />
+            }
+            footer={
+                <div style={{
+                    margin: "1.5rem",
+                }}/>
             }>
             <>
                 <Grid>
@@ -50,16 +55,16 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
                         ))
                     }
                 </Grid>
-                <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: "1rem"
-                }}>
-                    {
-                        isFetching && <SpinnerCircular color={"#4065dd"} />
-                    }
-                </div>
+                {
+                    isFetching && <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "1rem"
+                    }}>
+                        <SpinnerCircular color={"#4065dd"} />
+                    </div>
+                }
             </>
         </ScreenContainer>
     );

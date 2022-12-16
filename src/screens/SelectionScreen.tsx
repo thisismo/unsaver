@@ -76,7 +76,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                     <svg onClick={onBack} style={{
                         cursor: "pointer",
                     }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" height="32" width="32" preserveAspectRatio="xMidYMid meet"><path d="M24 40 8 24 24 8l2.1 2.1-12.4 12.4H40v3H13.7l12.4 12.4Z" /></svg>
-                    <h1>{collection.collection_name}</h1>
+                    <h2>{collection.collection_name}</h2>
                 </HeaderRow>
             } footer={
                 <ButtonRow>
@@ -145,19 +145,21 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                         ))
                     }
                 </Grid>
-                <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    padding: "1rem",
-                }}>
-                    {
-                        isFetching && <SpinnerCircular color={"#4065dd"} />
-                    }
-                    {
-                        !isFetching && media.length === 0 && <h3>No media found</h3>
-                    }
-                </div>
+                {
+                    isFetching || (!isFetching && media.length === 0) && <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "1rem",
+                    }}>
+                        {
+                            isFetching && <SpinnerCircular color={"#4065dd"} />
+                        }
+                        {
+                            !isFetching && media.length === 0 && <h3>No media found</h3>
+                        }
+                    </div>
+                }
             </>
         </ScreenContainer>
     )

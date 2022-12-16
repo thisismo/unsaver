@@ -73,6 +73,8 @@ const defaultOptions: RequestInit = {
     mode: 'cors',
 };
 
+const waitTime = 50;
+
 export async function getCollections(maxId: string): Promise<CollectionResponse<Collection>> {
     const response = await fetch('https://i.instagram.com/api/v1/collections/list/?collection_types=["ALL_MEDIA_AUTO_COLLECTION","MEDIA","AUDIO_AUTO_COLLECTION"]' +
         "&include_public_only=0" +
@@ -149,7 +151,7 @@ export async function* unsaveSelectedMedia(mediaIds: string[], csrftoken: string
                 await unsaveMedia(mediaItem.id, csrftoken);
                 unsaved++;
                 yield unsaved;
-                await waitForMe(1000);
+                await waitForMe(waitTime);
             }
         }
         return unsaved;
@@ -159,7 +161,7 @@ export async function* unsaveSelectedMedia(mediaIds: string[], csrftoken: string
         await unsaveMedia(mediaId, csrftoken);
         unsaved++;
         yield unsaved;
-        await waitForMe(1000);
+        await waitForMe(waitTime);
     }
     return unsaved;
 }
