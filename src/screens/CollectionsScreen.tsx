@@ -57,7 +57,7 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
                     padding: "1rem"
                 }}>
                     {
-                        isFetching && <SpinnerCircular color={"#4065dd"}/>
+                        isFetching && <SpinnerCircular color={"#4065dd"} />
                     }
                 </div>
             </>

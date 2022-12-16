@@ -12,7 +12,7 @@ import { SpinnerCircular } from "spinners-react";
 type Props = {
     collection: Collection;
     onBack?: () => void;
-    onUnsave?: (unsaveGenerator: AsyncGenerator<string, void, unknown>, total: number) => void;
+    onUnsave?: (unsaveGenerator: AsyncGenerator<number, number, unknown>, total: number) => void;
 }
 
 export type SelectionType = false | true | "ALL";
@@ -64,17 +64,8 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
 
     const handleUnsave = async () => {
         const unsaveGenerator = unsaveSelectedMedia(selectedMedia.map(media => media.id), identity!, selecting === "ALL" ? collection.collection_id : undefined);
-        /*let count = 0;
-        let total = selecting === "ALL" ? collection.collection_media_count : selectedMedia.length;
 
-        while (true) {
-            const response = await unsaveGenerator.next();
-
-            if (response.done) break;
-            count++;
-            console.log(`Unsaved ${count}/${total} media`);
-        }*/
-        onUnsave?.(unsaveGenerator, selecting === "ALL" ? collection.collection_media_count : selectedMedia.length);
+        onUnsave?.(unsaveGenerator, selecting === "ALL" ? collection.collection_media_count - selectedMedia.length : selectedMedia.length);
     };
 
     return (
@@ -89,7 +80,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                 </HeaderRow>
             } footer={
                 <ButtonRow>
-                    <Button onClick={() => {
+                    <Button disabled={media.length === 0} onClick={() => {
                         setSelecting("ALL");
                     }}>
                         Select All
@@ -103,7 +94,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                                 Cancel
                             </Button>
                         ) : (
-                            <Button onClick={() => {
+                            <Button disabled={media.length === 0} onClick={() => {
                                 setSelecting(true);
                             }}>
                                 Select
@@ -146,9 +137,9 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                                     </div>
                                 }
                                 {
-                                    selecting && <h3>
-                                        I am selected
-                                    </h3>
+                                    selecting && <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48"><path fill="#fff" d="M18.9 35.7 7.7 24.5l2.15-2.15 9.05 9.05 19.2-19.2 2.15 2.15Z" /></svg>
+                                    </div>
                                 }
                             </MediaTile>
                         ))
@@ -162,6 +153,9 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                 }}>
                     {
                         isFetching && <SpinnerCircular color={"#4065dd"} />
+                    }
+                    {
+                        !isFetching && media.length === 0 && <h3>No media found</h3>
                     }
                 </div>
             </>

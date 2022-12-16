@@ -139,24 +139,29 @@ export async function* unsaveSelectedMedia(mediaIds: string[], csrftoken: string
     //If collectionId is not provided, it means we are just unsaving the media in mediaIds
     //If collectionId is provided, we need to iterate through the collection to get all media
 
+    let unsaved = 0;
+
     if (collectionId) {
         for await (const media of collectionIterator(collectionId === "ALL_MEDIA_AUTO_COLLECTION" ?
             getAllSavedMedia : getCollectionMedia.bind(null, collectionId))) {
             for (const mediaItem of media) {
                 if (mediaIds.includes(mediaItem.id)) continue;
                 await unsaveMedia(mediaItem.id, csrftoken);
-                yield mediaItem.id;
+                unsaved++;
+                yield unsaved;
                 await waitForMe(1000);
             }
         }
-        return;
+        return unsaved;
     }
 
     for (const mediaId of mediaIds) {
         await unsaveMedia(mediaId, csrftoken);
-        yield mediaId;
+        unsaved++;
+        yield unsaved;
         await waitForMe(1000);
     }
+    return unsaved;
 }
 
 function waitForMe(ms: number) {

@@ -27,6 +27,21 @@ export default function CollectionTile({ collectionInfo, onClick }: Props) {
                     }} src={getThumbnailUrl(media)} crossOrigin="anonymous" decoding="auto" />
                 ))
             }
+            {
+                collectionInfo.collection_media_count == 0 && (
+                    <div style={{
+                        //Just center the text
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gridColumn: "1 / 3",
+                        gridRow: "1 / 3",
+                        textAlign: "center",
+                    }}>
+                        <h3>Wow such empty</h3>
+                    </div>
+                )
+            }
             <div style={{
                 position: "absolute",
                 display: "flex",
