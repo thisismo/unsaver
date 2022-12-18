@@ -4,8 +4,8 @@ import ButtonRow from "../components/ButtonRow";
 import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
-import { Collection, collectionIterator, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia, unsaveSelectedMedia } from "../networking/endpoints";
-import { doDownload, useIdentity } from "../hooks/hooks";
+import { Collection, collectionIterator, doDownload, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia, unsaveSelectedMedia } from "../networking/endpoints";
+import { useCsrfToken, useIdentity } from "../hooks/hooks";
 import ScreenContainer from "./ScreenContainer";
 import { SpinnerCircular } from "spinners-react";
 
@@ -23,7 +23,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
     const [selectedMedia, setSelectedMedia] = React.useState<Media[]>([]);
     const [isFetching, setIsFetching] = React.useState(false);
 
-    const identity = useIdentity();
+    const csrfToken = useCsrfToken();
 
     const [generator, _] = React.useState(collectionIterator(
         collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION" ?
@@ -63,7 +63,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
     };
 
     const handleUnsave = async () => {
-        const unsaveGenerator = unsaveSelectedMedia(selectedMedia.map(media => media.id), identity!, selecting === "ALL" ? collection.collection_id : undefined);
+        const unsaveGenerator = unsaveSelectedMedia(selectedMedia, csrfToken ?? "", selecting === "ALL" ? collection.collection_id : undefined);
 
         onUnsave?.(unsaveGenerator, selecting === "ALL" ? collection.collection_media_count - selectedMedia.length : selectedMedia.length);
     };

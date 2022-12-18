@@ -3,10 +3,11 @@ import React, { useEffect } from "react";
 type Props = {
     children: React.ReactNode;
     disabled?: boolean;
+    block?: boolean;
     onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
-export default function Button({ onClick, children, disabled }: Props) {
+export default function Button({ onClick, children, disabled, block }: Props) {
     const [hovered, setHovered] = React.useState(false);
     const [pressed, setPressed] = React.useState(false);
 
@@ -24,6 +25,7 @@ export default function Button({ onClick, children, disabled }: Props) {
                 ...{
                     borderRadius: 4,
                     padding: 12,
+                    width: block ? "100%" : "auto",
                     backgroundColor: !disabled ? "#4065dd" : "rgba(0, 0, 0, 0.12)",
                     color: "#fff",
                     border: "none",

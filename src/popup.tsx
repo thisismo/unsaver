@@ -13,9 +13,9 @@ const Popup = () => {
   const [unsaveGenerator, setUnsaveGenerator] = useState<AsyncGenerator<number, number, unknown> | null>(null);
   const [total, setTotal] = useState(0);
 
-  const identity = useIdentity();
+  const loggedIn = useIdentity();
 
-  if (identity === "") {
+  if (loggedIn === undefined) {
     return (
       <div style={{
         minWidth: "400px",
@@ -28,7 +28,7 @@ const Popup = () => {
     )
   }
 
-  if (identity === undefined) return (
+  if (loggedIn === false) return (
     <LoginScreen />
   )
 

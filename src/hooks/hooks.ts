@@ -1,37 +1,8 @@
 //Chrome.downloads API Hook
 import { useState, useEffect } from 'react';
-import { getMediaUrls } from '../components/MediaTile';
-import { Media } from '../networking/endpoints';
-
-export const useDownload = (url: string, filename: string) => {
-    const [downloaded, setDownloaded] = useState(false);
-
-    useEffect(() => {
-        chrome.downloads.download({
-            url,
-            filename,
-        }, () => {
-            setDownloaded(true);
-        });
-    }, [url, filename]);
-
-    return downloaded;
-}
-
-export const doDownload = (media: Media, includeThumbnails = false) => {
-    const urls = getMediaUrls(media, includeThumbnails);
-
-    urls.forEach(([mediaInfo, fileType]) => {
-        const filename = `${media.code}.${fileType}`;
-        chrome.downloads.download({
-            url: mediaInfo[0].url,
-            filename,
-        });
-    });
-}
 
 export const useIdentity = () => {
-    const [identity, setIdentity] = useState<string | undefined>("");
+    const [loggedIn, setLoggedIn] = useState<boolean | undefined>(undefined);
 
     useEffect(() => {
         checkLogin();
@@ -45,18 +16,32 @@ export const useIdentity = () => {
 
         // If we dont get redirected to instagram.com/ then we are logged in
         if (response.redirected) {
-            chrome.cookies.get({ url: "https://www.instagram.com", name: "csrftoken" }, (cookie) => {
-                if (cookie) {
-                    setIdentity(cookie.value);
-                } else {
-                    setIdentity(undefined);
-                }
-            });
+            setLoggedIn(true);
             return;
         }
         // If we aren't redirected, we are not logged in
-        setIdentity(undefined);
+        setLoggedIn(false);
     }
 
-    return identity;
+    return loggedIn;
+}
+
+export const useCsrfToken = () => {
+    const [csrfToken, setCsrfToken] = useState<string | undefined>("");
+
+    useEffect(() => {
+        checkCsrfToken();
+    }, []);
+
+    const checkCsrfToken = async () => {
+        chrome.cookies.get({ url: "https://www.instagram.com", name: "csrftoken" }, (cookie) => {
+            if (cookie) {
+                setCsrfToken(cookie.value);
+            } else {
+                setCsrfToken(undefined);
+            }
+        });
+    }
+
+    return csrfToken;
 }

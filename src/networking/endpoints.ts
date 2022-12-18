@@ -1,3 +1,6 @@
+import { getMediaUrls } from "../components/MediaTile";
+import { defaultOptions, Options } from "../options";
+
 export type Collection = {
     collection_id: string | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
     collection_media_count: number;
@@ -56,7 +59,7 @@ type CollectionResponse<T> = {
     num_results?: number;
 }
 
-const defaultOptions: RequestInit = {
+const defaultRequest: RequestInit = {
     headers: {
         "accept": "*/*",
         "sec-ch-ua-mobile": "?0",
@@ -82,7 +85,7 @@ export async function getCollections(maxId: string): Promise<CollectionResponse<
         `&max_id=${maxId}`,
         {
             method: 'GET',
-            ...defaultOptions,
+            ...defaultRequest,
             redirect: 'error'
         });
 
@@ -95,7 +98,7 @@ export async function getCollectionMedia(collectionId: string, maxId: string): P
     const response = await fetch(`https://i.instagram.com/api/v1/feed/collection/${collectionId}/posts/?max_id=${maxId}`,
         {
             method: 'GET',
-            ...defaultOptions,
+            ...defaultRequest,
         });
     let json = await response.json();
     json["items"] = json.items.map((item: MediaEnvelope) => item.media);
@@ -106,7 +109,7 @@ export async function getAllSavedMedia(maxId: string = ""): Promise<CollectionRe
     const response = await fetch(`https://i.instagram.com/api/v1/feed/saved/posts/?max_id=${maxId}`,
         {
             method: 'GET',
-            ...defaultOptions,
+            ...defaultRequest,
         });
     let json = await response.json();
     json["items"] = json.items.map((item: MediaEnvelope) => item.media);
@@ -117,7 +120,7 @@ export async function unsaveMedia(mediaId: string, csrftoken: string): Promise<v
     const response = await fetch(`https://www.instagram.com/api/v1/web/save/${mediaId}/unsave/`,
         {
             method: 'POST',
-            ...defaultOptions,
+            ...defaultRequest,
             headers: {
                 "x-csrftoken": csrftoken
             }
@@ -136,33 +139,74 @@ export async function* collectionIterator<T>(getItems: (maxId: string, ...args: 
     }
 }
 
-export async function* unsaveSelectedMedia(mediaIds: string[], csrftoken: string, collectionId?: string) {
+const downloadSingleAsync = (url: string, fileName: string): Promise<number> => {
+    return new Promise((resolve, reject) => {
+        chrome.downloads.download({
+            url: url,
+            filename: fileName,
+        }, (downloadId) => {
+            if (downloadId) {
+                resolve(downloadId);
+            } else {
+                reject();
+            }
+        });
+    });
+}
+
+export const doDownload = async (media: Media, includeThumbnails = false) => {
+    const urls = getMediaUrls(media, includeThumbnails);
+
+    for (const [mediaInfo, fileType] of urls) {
+        const filename = `${media.code}.${fileType}`;
+        await downloadSingleAsync(mediaInfo[0].url, filename);
+    }
+}
+
+let options: Options = defaultOptions;
+
+chrome.storage.sync.get(defaultOptions, (result) => {
+    Object.assign(options, result);
+});
+
+export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: string, collectionId?: string) {
     //If collectionId is provided, it means we are unsaving all media from the collection except the ones in mediaIds
     //If collectionId is not provided, it means we are just unsaving the media in mediaIds
     //If collectionId is provided, we need to iterate through the collection to get all media
+    if (options.downloadMedia) chrome.downloads.setShelfEnabled(false);
 
     let unsaved = 0;
+
+    console.log("Options: " + JSON.stringify(options));
 
     if (collectionId) {
         for await (const media of collectionIterator(collectionId === "ALL_MEDIA_AUTO_COLLECTION" ?
             getAllSavedMedia : getCollectionMedia.bind(null, collectionId))) {
             for (const mediaItem of media) {
-                if (mediaIds.includes(mediaItem.id)) continue;
+                if (selectedMedia.some(m => m.id === mediaItem.id)) continue;
+
+                if (options.downloadMedia) await doDownload(mediaItem, false);
+
                 await unsaveMedia(mediaItem.id, csrftoken);
                 unsaved++;
                 yield unsaved;
-                await waitForMe(waitTime);
+                await waitForMe(options.waitTime);
             }
         }
+
+        if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
         return unsaved;
     }
 
-    for (const mediaId of mediaIds) {
-        await unsaveMedia(mediaId, csrftoken);
+    for (const mediaItem of selectedMedia) {
+        if (options.downloadMedia) await doDownload(mediaItem, false);
+
+        await unsaveMedia(mediaItem.id, csrftoken);
         unsaved++;
         yield unsaved;
-        await waitForMe(waitTime);
+        await waitForMe(options.waitTime);
     }
+    if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
     return unsaved;
 }
 
