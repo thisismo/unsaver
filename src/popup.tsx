@@ -8,14 +8,21 @@ import LoginScreen from "./screens/LoginScreen";
 import SelectionScreen from "./screens/SelectionScreen";
 import UnsavingScreen from "./screens/UnsavingScreen";
 
+export type UserInfo = {
+  csrfToken: string;
+  userName: string;
+}
+
+export const UserContext = React.createContext<null | UserInfo>(null);
+
 const Popup = () => {
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [unsaveGenerator, setUnsaveGenerator] = useState<AsyncGenerator<number, number, unknown> | null>(null);
   const [total, setTotal] = useState(0);
 
-  const loggedIn = useIdentity();
+  const [userInfo, isLoading] = useIdentity();
 
-  if (loggedIn === undefined) {
+  if (isLoading) {
     return (
       <div style={{
         minWidth: "400px",
@@ -28,12 +35,12 @@ const Popup = () => {
     )
   }
 
-  if (loggedIn === false) return (
+  if (!userInfo) return (
     <LoginScreen />
   )
 
   return (
-    <>
+    <UserContext.Provider value={userInfo}>
       {
         selectedCollection === null && <CollectionsScreen onCollectionSelected={(collection: Collection) => {
           setSelectedCollection(collection);
@@ -54,7 +61,7 @@ const Popup = () => {
           setTotal(0);
         }} />
       }
-    </>
+    </UserContext.Provider>
   );
 };
 

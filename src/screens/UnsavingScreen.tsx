@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { SpinnerCircular } from "spinners-react";
 import Button from "../components/Button";
-import { useIdentity } from "../hooks/hooks";
 import ScreenContainer from "./ScreenContainer";
 
 type Props = {
@@ -13,8 +12,6 @@ type Props = {
 export default function UnsavingScreen({ generator, total, onExit }: Props) {
     const [unsaved, setUnsaved] = React.useState(0);
     const [done, setDone] = React.useState(false);
-
-    const identity = useIdentity();
 
     useEffect(() => {
         const unsave = async () => {

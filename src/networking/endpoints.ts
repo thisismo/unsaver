@@ -59,7 +59,7 @@ type CollectionResponse<T> = {
     num_results?: number;
 }
 
-const defaultRequest: RequestInit = {
+export const defaultRequest: RequestInit = {
     headers: {
         "accept": "*/*",
         "sec-ch-ua-mobile": "?0",
@@ -76,7 +76,20 @@ const defaultRequest: RequestInit = {
     mode: 'cors',
 };
 
-const waitTime = 50;
+export async function getAccountInfo(): Promise<{ username: string }> {
+    const response = await fetch('https://i.instagram.com/api/v1/accounts/edit/web_form_data/',
+        {
+            method: 'GET',
+            ...defaultRequest,
+        });
+
+    console.log("getAccountInfo", response.redirected, response.status);
+    if (response.redirected) {
+        throw new Error("Not logged in");
+    }
+
+    return (await response.json())["form_data"];
+}
 
 export async function getCollections(maxId: string): Promise<CollectionResponse<Collection>> {
     const response = await fetch('https://i.instagram.com/api/v1/collections/list/?collection_types=["ALL_MEDIA_AUTO_COLLECTION","MEDIA","AUDIO_AUTO_COLLECTION"]' +
@@ -147,6 +160,18 @@ const downloadSingleAsync = (url: string, fileName: string): Promise<number> => 
         }, (downloadId) => {
             if (downloadId) {
                 resolve(downloadId);
+            } else {
+                reject();
+            }
+        });
+    });
+}
+
+export const getCsrfToken = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        chrome.cookies.get({ url: "https://www.instagram.com", name: "csrftoken" }, (cookie) => {
+            if (cookie) {
+                resolve(cookie.value);
             } else {
                 reject();
             }
