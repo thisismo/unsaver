@@ -17,10 +17,15 @@ export default function HeaderRow({ left, center, right, children }: Props) {
             gap: 8,
             marginInline: 8,
         }}>
-            {left}
-            {center}
-            {right}
-            {!left && !center && !right && children}
+            {
+                !children &&
+                <>
+                    {left || <div></div>}
+                    {center || <div></div>}
+                    {right || <div></div>}
+                </>
+            }
+            {children}
         </div>
     );
 }

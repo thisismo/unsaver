@@ -16,11 +16,17 @@ export default function ButtonRow({ left, center, right, children }: Props) {
             alignItems: "center",
             gap: 10,
             margin: "1.5rem 10px",
+            textAlign: "center",
         }}>
-            {left}
-            {center}
-            {right}
-            {!left && !center && !right && children}
+            {
+                !children &&
+                <>
+                    {left || <div></div>}
+                    {center || <div></div>}
+                    {right || <div></div>}
+                </>
+            }
+            {children}
         </div>
     );
 }

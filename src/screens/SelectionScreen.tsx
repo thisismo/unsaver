@@ -34,8 +34,6 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
         fetchMedia();
     }, []);
 
-    console.log("selectedMedia", selecting, selectedMedia);
-
     const fetchMedia = async () => {
         setIsFetching(true);
         const response = await generator.next();
@@ -76,7 +74,7 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                 <HeaderRow>
                     <svg onClick={onBack} style={{
                         cursor: "pointer",
-                    }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" height="32" width="32" preserveAspectRatio="xMidYMid meet"><path d="M24 40 8 24 24 8l2.1 2.1-12.4 12.4H40v3H13.7l12.4 12.4Z" /></svg>
+                    }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" height="2rem" width="2rem" preserveAspectRatio="xMidYMid meet"><path d="M24 40 8 24 24 8l2.1 2.1-12.4 12.4H40v3H13.7l12.4 12.4Z" /></svg>
                     <h2>{collection.collection_name}</h2>
                 </HeaderRow>
             } footer={

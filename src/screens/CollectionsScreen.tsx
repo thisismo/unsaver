@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SpinnerCircular } from 'spinners-react';
 import CollectionTile from '../components/CollectionTile';
 import Grid from '../components/Grid';
 import HeaderRow from '../components/HeaderRow';
 import { Collection, collectionIterator, getCollections } from '../networking/endpoints';
+import { UserContext } from '../popup';
 import ScreenContainer from './ScreenContainer';
 
 type Props = {
@@ -14,6 +15,8 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
     const [collections, setCollections] = useState<Collection[]>([]);
     const [isFetching, setIsFetching] = useState(false);
     const [generator, _] = React.useState(collectionIterator(getCollections));
+
+    const userInfo = useContext(UserContext);
 
     useEffect(() => {
         fetchCollections();
@@ -40,7 +43,7 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
         <ScreenContainer
             onScroll={handleScroll}
             header={
-                <HeaderRow left={<div></div>} center={<h2>Your collections</h2>} />
+                <HeaderRow center={<h2>{userInfo?.userName}'s collections</h2>} />
             }
             footer={
                 <div style={{
