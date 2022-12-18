@@ -16,10 +16,6 @@ export type UserInfo = {
 export const UserContext = React.createContext<null | UserInfo>(null);
 
 const Popup = () => {
-  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
-  const [unsaveGenerator, setUnsaveGenerator] = useState<AsyncGenerator<number, number, unknown> | null>(null);
-  const [total, setTotal] = useState(0);
-
   const [userInfo, isLoading] = useIdentity();
 
   if (isLoading) {
@@ -41,26 +37,7 @@ const Popup = () => {
 
   return (
     <UserContext.Provider value={userInfo}>
-      {
-        selectedCollection === null && <CollectionsScreen onCollectionSelected={(collection: Collection) => {
-          setSelectedCollection(collection);
-        }} />
-      }
-      {
-        unsaveGenerator === null && selectedCollection !== null && <SelectionScreen collection={selectedCollection} onBack={() => {
-          setSelectedCollection(null);
-        }} onUnsave={(generator: AsyncGenerator<number, number, unknown>, total: number) => {
-          setUnsaveGenerator(generator);
-          setTotal(total);
-        }} />
-      }
-      {
-        unsaveGenerator !== null && <UnsavingScreen generator={unsaveGenerator} total={total} onExit={() => {
-          setUnsaveGenerator(null);
-          setSelectedCollection(null);
-          setTotal(0);
-        }} />
-      }
+      <CollectionsScreen/>
     </UserContext.Provider>
   );
 };

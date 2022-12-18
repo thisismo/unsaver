@@ -1,28 +1,39 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { SpinnerCircular } from "spinners-react";
 import Button from "../components/Button";
 import ButtonRow from "../components/ButtonRow";
 import HeaderRow from "../components/HeaderRow";
+import { Collection, Media, unsaveSelectedMedia } from "../networking/endpoints";
+import { UserContext } from "../popup";
 import ScreenContainer from "./ScreenContainer";
+import { SelectionType } from "./SelectionScreen";
 
 type Props = {
-    generator: AsyncGenerator<number, number, unknown>;
-    total: number;
+    collection: Collection;
+    selectedMedia: Media[];
+    unsaveAll: boolean;
+    onBack?: (unsavedMedia: Media[]) => void;
     onExit?: () => void;
 }
 
-export default function UnsavingScreen({ generator, total, onExit }: Props) {
-    const [unsaved, setUnsaved] = React.useState(0);
+export default function UnsavingScreen({ collection, selectedMedia, unsaveAll, onBack, onExit }: Props) {
+    const [unsavedMedia, setUnsavedMedia] = React.useState<Media[]>([]);
     const [done, setDone] = React.useState(false);
+
+    const total = unsaveAll ? collection.collection_media_count - selectedMedia.length : selectedMedia.length;
+
+    const userInfo = useContext(UserContext);
+
+    const [generator, _] = React.useState(unsaveSelectedMedia(selectedMedia, userInfo!.csrfToken, unsaveAll ? collection.collection_id : undefined));
 
     useEffect(() => {
         const unsave = async () => {
-            const unsavedCount = await generator.next();
-            if (!unsavedCount.done) {
-                setUnsaved(unsavedCount.value);
+            const unsaveGenerator = await generator.next();
+            if (!unsaveGenerator.done) {
+                setUnsavedMedia([...unsavedMedia, unsaveGenerator.value]);
                 unsave();
             } else {
-                setUnsaved(unsavedCount.value)
+                setUnsavedMedia(unsaveGenerator.value);
                 setDone(true);
             }
         };
@@ -33,7 +44,7 @@ export default function UnsavingScreen({ generator, total, onExit }: Props) {
         <ScreenContainer
             header={
                 <HeaderRow center={
-                    done ? <h2>Unsaved {unsaved} of {total} posts.</h2> : <h2>Unsaving {unsaved} of {total}...</h2>
+                    done ? <h2>Unsaved {unsavedMedia.length} of {total} posts.</h2> : <h2>Unsaving {unsavedMedia.length} of {total}...</h2>
                 }/>
             }
             footer={
@@ -48,14 +59,19 @@ export default function UnsavingScreen({ generator, total, onExit }: Props) {
                     {
                         done &&
                         <>
-                            <p style={{ cursor: "pointer" }} onClick={onExit}>
-                                All collections
+                            <p style={{ cursor: "pointer" }} onClick={() => {
+                                onBack && onBack(unsavedMedia);
+                            }}>
+                                Back
                             </p>
                             <Button onClick={() => {
                                 window.open("https://www.paypal.com/donate/?hosted_button_id=AMC5PSSJFX9CS", "_blank");
                             }}>
-                                ❥ Support Me ❥
+                                Support Me ❥
                             </Button>
+                            <p style={{ cursor: "pointer" }} onClick={onExit}>
+                                All collections
+                            </p>
                         </>
                     }
                 </ButtonRow>

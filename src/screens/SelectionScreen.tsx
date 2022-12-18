@@ -5,26 +5,25 @@ import Grid from "../components/Grid";
 import HeaderRow from "../components/HeaderRow";
 import MediaTile, { getMediaUrls } from "../components/MediaTile";
 import { Collection, collectionIterator, doDownload, getAllSavedMedia, getCollectionMedia, Media, unsaveMedia, unsaveSelectedMedia } from "../networking/endpoints";
-import { useIdentity } from "../hooks/hooks";
 import ScreenContainer from "./ScreenContainer";
 import { SpinnerCircular } from "spinners-react";
-import { UserContext } from "../popup";
+import UnsavingScreen from "./UnsavingScreen";
 
 type Props = {
     collection: Collection;
     onBack?: () => void;
-    onUnsave?: (unsaveGenerator: AsyncGenerator<number, number, unknown>, total: number) => void;
 }
 
 export type SelectionType = false | true | "ALL";
 
-export default function SelectionScreen({ collection, onBack, onUnsave }: Props) {
+export default function SelectionScreen({ collection, onBack }: Props) {
+    const [isFetching, setIsFetching] = React.useState(false);
     const [media, setMedia] = React.useState<Media[]>([]);
+
     const [selecting, setSelecting] = React.useState<SelectionType>(false);
     const [selectedMedia, setSelectedMedia] = React.useState<Media[]>([]);
-    const [isFetching, setIsFetching] = React.useState(false);
 
-    const userInfo = useContext(UserContext);
+    const [unsaveInProgress, setUnsaveInProgress] = React.useState(false);
 
     const [generator, _] = React.useState(collectionIterator(
         collection.collection_id === "ALL_MEDIA_AUTO_COLLECTION" ?
@@ -52,8 +51,8 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
     }
 
     const handleMediaClick = (media: Media) => {
-        console.log("media clicked", media);
         if (!selecting) return;
+
         if (selectedMedia.includes(media)) {
             setSelectedMedia(selectedMedia.filter((m) => m !== media));
             return;
@@ -61,11 +60,22 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
         setSelectedMedia([...selectedMedia, media]);
     };
 
-    const handleUnsave = async () => {
-        const unsaveGenerator = unsaveSelectedMedia(selectedMedia, userInfo?.csrfToken ?? "", selecting === "ALL" ? collection.collection_id : undefined);
-
-        onUnsave?.(unsaveGenerator, selecting === "ALL" ? collection.collection_media_count - selectedMedia.length : selectedMedia.length);
-    };
+    if (unsaveInProgress) {
+        return (
+            <UnsavingScreen collection={collection} selectedMedia={selectedMedia} unsaveAll={selecting === "ALL"}
+                onBack={(unsavedMedia) => {
+                    console.log("Back from Unsaving", unsavedMedia);
+                    setSelecting(false);
+                    setSelectedMedia([]);
+                    setMedia(media.filter(({id}) => !unsavedMedia.map(m => m.id).includes(id)));
+                    setUnsaveInProgress(false);
+                }}
+                onExit={() => {
+                    onBack?.();
+                }}
+            />
+        );
+    }
 
     return (
         <ScreenContainer
@@ -100,7 +110,9 @@ export default function SelectionScreen({ collection, onBack, onUnsave }: Props)
                             </Button>
                         )
                     }
-                    <Button disabled={selectedMedia.length <= 0 && selecting !== "ALL"} onClick={handleUnsave}>
+                    <Button disabled={selectedMedia.length <= 0 && selecting !== "ALL"} onClick={() => {
+                        setUnsaveInProgress(true);
+                    }}>
                         Unsave
                     </Button>
                 </ButtonRow>

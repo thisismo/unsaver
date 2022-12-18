@@ -6,13 +6,12 @@ import HeaderRow from '../components/HeaderRow';
 import { Collection, collectionIterator, getCollections } from '../networking/endpoints';
 import { UserContext } from '../popup';
 import ScreenContainer from './ScreenContainer';
+import SelectionScreen from './SelectionScreen';
 
-type Props = {
-    onCollectionSelected: (collection: Collection) => void;
-}
-
-export default function CollectionsScreen({ onCollectionSelected: onSelectedCollection }: Props) {
+export default function CollectionsScreen() {
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+
     const [isFetching, setIsFetching] = useState(false);
     const [generator, _] = React.useState(collectionIterator(getCollections));
 
@@ -39,6 +38,12 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
         fetchCollections();
     }
 
+    if(selectedCollection) {
+        return <SelectionScreen collection={selectedCollection} onBack={() => {
+            setSelectedCollection(null);
+        }}/>
+    }
+
     return (
         <ScreenContainer
             onScroll={handleScroll}
@@ -54,7 +59,9 @@ export default function CollectionsScreen({ onCollectionSelected: onSelectedColl
                 <Grid>
                     {
                         collections.map((collection) => (
-                            <CollectionTile key={collection.collection_id} collectionInfo={collection} onClick={onSelectedCollection.bind(null, collection)} />
+                            <CollectionTile key={collection.collection_id} collectionInfo={collection} onClick={() => {
+                                setSelectedCollection(collection);
+                            }} />
                         ))
                     }
                 </Grid>

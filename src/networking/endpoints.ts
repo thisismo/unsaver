@@ -200,7 +200,7 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
     //If collectionId is provided, we need to iterate through the collection to get all media
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(false);
 
-    let unsaved = 0;
+    let unsavedMedia: Media[] = [];
 
     console.log("Options: " + JSON.stringify(options));
 
@@ -210,29 +210,32 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
             for (const mediaItem of media) {
                 if (selectedMedia.some(m => m.id === mediaItem.id)) continue;
 
-                if (options.downloadMedia) await doDownload(mediaItem, false);
+                if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
 
-                await unsaveMedia(mediaItem.id, csrftoken);
-                unsaved++;
-                yield unsaved;
+                await unsaveMedia(mediaItem.id, csrftoken).then(() => {
+                    unsavedMedia.push(mediaItem);
+                })
+
+                yield mediaItem;
                 await waitForMe(options.waitTime);
             }
         }
 
         if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
-        return unsaved;
+        return unsavedMedia;
     }
 
     for (const mediaItem of selectedMedia) {
-        if (options.downloadMedia) await doDownload(mediaItem, false);
+        if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
 
-        await unsaveMedia(mediaItem.id, csrftoken);
-        unsaved++;
-        yield unsaved;
+        await unsaveMedia(mediaItem.id, csrftoken).then(() => {
+            unsavedMedia.push(mediaItem);
+        });
+        yield mediaItem;
         await waitForMe(options.waitTime);
     }
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
-    return unsaved;
+    return unsavedMedia;
 }
 
 function waitForMe(ms: number) {
