@@ -72,7 +72,7 @@ const Options = () => {
             Object.entries(options).map(([key, value]) => {
               if (typeof value === "number") {
                 return (
-                  <div style={{
+                  <div key={key} style={{
                     display: "flex",
                     justifyItems: "left",
                     marginBottom: "0.5rem",
@@ -85,7 +85,6 @@ const Options = () => {
                     </Tooltip>
                     <input
                       type="number"
-                      id={key}
                       style={{ marginRight: "0.5rem", width: "60px" }}
                       value={value as number}
                       onChange={(e) => {
@@ -100,7 +99,7 @@ const Options = () => {
               }
 
               return (
-                <div style={{
+                <div key={key} style={{
                   display: "flex",
                   alignItems: "center",
                   marginBottom: "0.5rem",
@@ -108,7 +107,6 @@ const Options = () => {
                 }}>
                   <input
                     type="checkbox"
-                    id={key}
                     style={{ marginRight: "0.5rem" }}
                     checked={value as boolean}
                     onChange={(e) => {
