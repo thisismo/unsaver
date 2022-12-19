@@ -3,32 +3,32 @@ import ReactDOM from "react-dom";
 import Button from "./components/Button";
 import Tooltip from "./components/Tooltip";
 
-export type Options = {
+export type AvailableOptions = {
   downloadMedia: boolean;
   includeThumbnails: boolean;
   waitTime: number;
 };
 
-export const defaultOptions: Options = {
+export const defaultOptions: AvailableOptions = {
   downloadMedia: false,
   includeThumbnails: false,
   waitTime: 1000,
 }
 
-const labels: Record<keyof Options, string> = {
+const labels: Record<keyof AvailableOptions, string> = {
   downloadMedia: "Download media",
   includeThumbnails: "Include thumbnails",
   waitTime: "Wait time (ms)",
 };
 
-const info: Record<keyof Options, string> = {
+const info: Record<keyof AvailableOptions, string> = {
   downloadMedia: "Download media before unsaving",
   includeThumbnails: "Include video thumbnails in the download",
   waitTime: "The time to wait between unsaving posts. Recommended: 1000ms (Instagram will temporarily block you if you unsave too fast)",
 };
 
 const Options = () => {
-  const [options, setOptions] = useState<Options>(defaultOptions);
+  const [options, setOptions] = useState<AvailableOptions>(defaultOptions);
 
   const [status, setStatus] = useState("");
 
@@ -38,7 +38,7 @@ const Options = () => {
     chrome.storage.sync.get(
       options,
       (items) => {
-        setOptions(items as Options);
+        setOptions(items as AvailableOptions);
       }
     );
   }, []);
@@ -80,8 +80,8 @@ const Options = () => {
                     width: "fit-content",
                     marginLeft: 4
                   }}>
-                    <Tooltip text={info[key as keyof Options]}>
-                      <label htmlFor={key}>{labels[key as keyof Options]}:</label>
+                    <Tooltip text={info[key as keyof AvailableOptions]}>
+                      <label htmlFor={key}>{labels[key as keyof AvailableOptions]}:</label>
                     </Tooltip>
                     <input
                       type="number"
@@ -116,8 +116,8 @@ const Options = () => {
                       });
                     }}
                   />
-                  <Tooltip text={info[key as keyof Options]}>
-                    <label htmlFor={key}>{labels[key as keyof Options]}</label>
+                  <Tooltip text={info[key as keyof AvailableOptions]}>
+                    <label htmlFor={key}>{labels[key as keyof AvailableOptions]}</label>
                   </Tooltip>
                 </div>
               );

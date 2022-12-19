@@ -157,18 +157,23 @@ export default function SelectionScreen({ collection, onBack }: Props) {
                     }
                 </Grid>
                 {
-                    isFetching || (!isFetching && media.length === 0) && <div style={{
+                    isFetching && <div style={{
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
                         padding: "1rem",
                     }}>
-                        {
-                            isFetching && <SpinnerCircular color={"#4065dd"} />
-                        }
-                        {
-                            !isFetching && media.length === 0 && <h3>No media found</h3>
-                        }
+                        <SpinnerCircular color={"#4065dd"} />
+                    </div>
+                }
+                {
+                    !isFetching && media.length === 0 && <div style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: "1rem",
+                    }}>
+                        <h3>No media found</h3>
                     </div>
                 }
             </>

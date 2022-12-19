@@ -1,5 +1,5 @@
 import { getMediaUrls } from "../components/MediaTile";
-import { defaultOptions, Options } from "../options";
+import { defaultOptions, AvailableOptions } from "../options";
 
 export type Collection = {
     collection_id: string | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
@@ -188,7 +188,7 @@ export const doDownload = async (media: Media, includeThumbnails = false) => {
     }
 }
 
-let options: Options = defaultOptions;
+let options: AvailableOptions = defaultOptions;
 
 chrome.storage.sync.get(defaultOptions, (result) => {
     Object.assign(options, result);
