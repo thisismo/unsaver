@@ -216,7 +216,7 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
                     unsavedMedia.push(mediaItem);
                 })
 
-                yield mediaItem;
+                yield unsavedMedia;
                 await waitForMe(options.waitTime);
             }
         }
@@ -231,7 +231,7 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
         await unsaveMedia(mediaItem.id, csrftoken).then(() => {
             unsavedMedia.push(mediaItem);
         });
-        yield mediaItem;
+        yield unsavedMedia;
         await waitForMe(options.waitTime);
     }
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);

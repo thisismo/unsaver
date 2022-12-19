@@ -18,6 +18,7 @@ type Props = {
 
 export default function UnsavingScreen({ collection, selectedMedia, unsaveAll, onBack, onExit }: Props) {
     const [unsavedMedia, setUnsavedMedia] = React.useState<Media[]>([]);
+    const [unsavedCount, setUnsavedCount] = React.useState(0);
     const [done, setDone] = React.useState(false);
 
     const total = unsaveAll ? collection.collection_media_count - selectedMedia.length : selectedMedia.length;
@@ -27,28 +28,27 @@ export default function UnsavingScreen({ collection, selectedMedia, unsaveAll, o
     const [generator, _] = React.useState(unsaveSelectedMedia(selectedMedia, userInfo!.csrfToken, unsaveAll ? collection.collection_id : undefined));
 
     useEffect(() => {
+        const unsave = async () => {
+            let res = await generator.next();
+            while(!res.done && !done) {
+                setUnsavedMedia(res.value);
+                setUnsavedCount(res.value.length);
+                res = await generator.next();
+            }
+    
+            setDone(true);
+            setUnsavedMedia(res.value);
+            setUnsavedCount(res.value.length);
+        };
+
         unsave();
     }, []);
-
-    console.log("unsavedMedia", unsavedMedia.length, unsavedMedia);
-
-    const unsave = async () => {
-        const unsaveGenerator = await generator.next();
-        if (!unsaveGenerator.done) {
-            console.log("Generator", unsavedMedia.length, unsavedMedia, unsaveGenerator.value);
-            setUnsavedMedia([...unsavedMedia, unsaveGenerator.value])
-            unsave();
-        } else {
-            setUnsavedMedia(unsaveGenerator.value);
-            setDone(true);
-        }
-    };
 
     return (
         <ScreenContainer
             header={
                 <HeaderRow center={
-                    done ? <h2>Unsaved {unsavedMedia.length} of {total} posts.</h2> : <h2>Unsaving {unsavedMedia.length} of {total}...</h2>
+                    done ? <h2>Unsaved {unsavedCount} of {total} posts.</h2> : <h2>Unsaving {unsavedCount} of {total}...</h2>
                 }/>
             }
             footer={
