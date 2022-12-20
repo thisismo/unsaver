@@ -35,12 +35,18 @@ const Options = () => {
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
     // stored in chrome.storage.
+    let mounted = true;
     chrome.storage.sync.get(
       options,
       (items) => {
+        if (!mounted) return;
         setOptions(items as AvailableOptions);
       }
     );
+
+    return () => {
+      mounted = false;
+    }
   }, []);
 
   const saveOptions = () => {
