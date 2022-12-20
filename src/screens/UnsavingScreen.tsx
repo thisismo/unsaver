@@ -18,37 +18,37 @@ type Props = {
 
 export default function UnsavingScreen({ collection, selectedMedia, unsaveAll, onBack, onExit }: Props) {
     const [unsavedMedia, setUnsavedMedia] = React.useState<Media[]>([]);
-    const [unsavedCount, setUnsavedCount] = React.useState(0);
     const [done, setDone] = React.useState(false);
 
-    const total = unsaveAll ? collection.collection_media_count - selectedMedia.length : selectedMedia.length;
+    const total = unsaveAll ? (collection.collection_media_count - selectedMedia.length) : selectedMedia.length;
 
     const userInfo = useContext(UserContext);
 
     const [generator, _] = React.useState(unsaveSelectedMedia(selectedMedia, userInfo!.csrfToken, unsaveAll ? collection.collection_id : undefined));
 
     useEffect(() => {
-        const unsave = async () => {
-            let res = await generator.next();
-            while(!res.done && !done) {
-                setUnsavedMedia(res.value);
-                setUnsavedCount(res.value.length);
-                res = await generator.next();
-            }
-    
-            setDone(true);
-            setUnsavedMedia(res.value);
-            setUnsavedCount(res.value.length);
-        };
+        if (done) return;
 
-        unsave();
-    }, []);
+        const unsaveNext = async () => {
+            const res = await generator.next();
+
+            if (res.done) {
+                setDone(true);
+                setUnsavedMedia(res.value);
+                return;
+            }
+
+            setUnsavedMedia([...unsavedMedia, res.value]);
+        }
+
+        unsaveNext();
+    }, [unsavedMedia]);
 
     return (
         <ScreenContainer
             header={
                 <HeaderRow center={
-                    done ? <h2>Unsaved {unsavedCount} of {total} posts.</h2> : <h2>Unsaving {unsavedCount} of {total}...</h2>
+                    done ? <h2>Unsaved {unsavedMedia.length} of {total} posts.</h2> : <h2>Unsaving {unsavedMedia.length} of {total}...</h2>
                 }/>
             }
             footer={

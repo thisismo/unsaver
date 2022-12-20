@@ -195,19 +195,14 @@ chrome.storage.sync.get(defaultOptions, (result) => {
 });
 
 export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: string, collectionId?: string) {
-    //If collectionId is provided, it means we are unsaving all media from the collection except the ones in mediaIds
-    //If collectionId is not provided, it means we are just unsaving the media in mediaIds
-    //If collectionId is provided, we need to iterate through the collection to get all media
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(false);
 
     let unsavedMedia: Media[] = [];
 
-    console.log("Options: " + JSON.stringify(options));
-
     if (collectionId) {
         for await (const media of collectionIterator(collectionId === "ALL_MEDIA_AUTO_COLLECTION" ?
             getAllSavedMedia : getCollectionMedia.bind(null, collectionId))) {
-            for (const mediaItem of media) {
+            for await (const mediaItem of media) {
                 if (selectedMedia.some(m => m.id === mediaItem.id)) continue;
 
                 if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
@@ -216,7 +211,7 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
                     unsavedMedia.push(mediaItem);
                 })
 
-                yield unsavedMedia;
+                yield mediaItem;
                 await waitForMe(options.waitTime);
             }
         }
@@ -225,13 +220,13 @@ export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: st
         return unsavedMedia;
     }
 
-    for (const mediaItem of selectedMedia) {
+    for await (const mediaItem of selectedMedia) {
         if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
 
         await unsaveMedia(mediaItem.id, csrftoken).then(() => {
             unsavedMedia.push(mediaItem);
         });
-        yield unsavedMedia;
+        yield mediaItem;
         await waitForMe(options.waitTime);
     }
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
