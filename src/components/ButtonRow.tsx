@@ -4,7 +4,7 @@ type Props = {
     left?: React.ReactNode;
     center?: React.ReactNode;
     right?: React.ReactNode;
-    children: React.ReactNode;
+    children?: React.ReactNode;
 }
 
 export default function ButtonRow({ left, center, right, children }: Props) {

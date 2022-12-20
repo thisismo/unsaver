@@ -3,44 +3,50 @@ import ReactDOM from "react-dom";
 import Button from "./components/Button";
 import Tooltip from "./components/Tooltip";
 
-export type Options = {
+export type AvailableOptions = {
   downloadMedia: boolean;
   includeThumbnails: boolean;
   waitTime: number;
 };
 
-export const defaultOptions: Options = {
+export const defaultOptions: AvailableOptions = {
   downloadMedia: false,
   includeThumbnails: false,
   waitTime: 1000,
 }
 
-const labels: Record<keyof Options, string> = {
+const labels: Record<keyof AvailableOptions, string> = {
   downloadMedia: "Download media",
   includeThumbnails: "Include thumbnails",
   waitTime: "Wait time (ms)",
 };
 
-const info: Record<keyof Options, string> = {
+const info: Record<keyof AvailableOptions, string> = {
   downloadMedia: "Download media before unsaving",
   includeThumbnails: "Include video thumbnails in the download",
   waitTime: "The time to wait between unsaving posts. Recommended: 1000ms (Instagram will temporarily block you if you unsave too fast)",
 };
 
 const Options = () => {
-  const [options, setOptions] = useState<Options>(defaultOptions);
+  const [options, setOptions] = useState<AvailableOptions>(defaultOptions);
 
   const [status, setStatus] = useState("");
 
   useEffect(() => {
     // Restores select box and checkbox state using the preferences
     // stored in chrome.storage.
+    let mounted = true;
     chrome.storage.sync.get(
       options,
       (items) => {
-        setOptions(items as Options);
+        if (!mounted) return;
+        setOptions(items as AvailableOptions);
       }
     );
+
+    return () => {
+      mounted = false;
+    }
   }, []);
 
   const saveOptions = () => {
@@ -72,7 +78,7 @@ const Options = () => {
             Object.entries(options).map(([key, value]) => {
               if (typeof value === "number") {
                 return (
-                  <div style={{
+                  <div key={key} style={{
                     display: "flex",
                     justifyItems: "left",
                     marginBottom: "0.5rem",
@@ -80,12 +86,11 @@ const Options = () => {
                     width: "fit-content",
                     marginLeft: 4
                   }}>
-                    <Tooltip text={info[key as keyof Options]}>
-                      <label htmlFor={key}>{labels[key as keyof Options]}:</label>
+                    <Tooltip text={info[key as keyof AvailableOptions]}>
+                      <label htmlFor={key}>{labels[key as keyof AvailableOptions]}:</label>
                     </Tooltip>
                     <input
                       type="number"
-                      id={key}
                       style={{ marginRight: "0.5rem", width: "60px" }}
                       value={value as number}
                       onChange={(e) => {
@@ -100,7 +105,7 @@ const Options = () => {
               }
 
               return (
-                <div style={{
+                <div key={key} style={{
                   display: "flex",
                   alignItems: "center",
                   marginBottom: "0.5rem",
@@ -108,7 +113,6 @@ const Options = () => {
                 }}>
                   <input
                     type="checkbox"
-                    id={key}
                     style={{ marginRight: "0.5rem" }}
                     checked={value as boolean}
                     onChange={(e) => {
@@ -118,8 +122,8 @@ const Options = () => {
                       });
                     }}
                   />
-                  <Tooltip text={info[key as keyof Options]}>
-                    <label htmlFor={key}>{labels[key as keyof Options]}</label>
+                  <Tooltip text={info[key as keyof AvailableOptions]}>
+                    <label htmlFor={key}>{labels[key as keyof AvailableOptions]}</label>
                   </Tooltip>
                 </div>
               );

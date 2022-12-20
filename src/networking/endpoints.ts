@@ -1,5 +1,5 @@
 import { getMediaUrls } from "../components/MediaTile";
-import { defaultOptions, Options } from "../options";
+import { defaultOptions, AvailableOptions } from "../options";
 
 export type Collection = {
     collection_id: string | "ALL_MEDIA_AUTO_COLLECTION" | "AUDIO_AUTO_COLLECTION";
@@ -188,51 +188,49 @@ export const doDownload = async (media: Media, includeThumbnails = false) => {
     }
 }
 
-let options: Options = defaultOptions;
+let options: AvailableOptions = defaultOptions;
 
 chrome.storage.sync.get(defaultOptions, (result) => {
     Object.assign(options, result);
 });
 
 export async function* unsaveSelectedMedia(selectedMedia: Media[], csrftoken: string, collectionId?: string) {
-    //If collectionId is provided, it means we are unsaving all media from the collection except the ones in mediaIds
-    //If collectionId is not provided, it means we are just unsaving the media in mediaIds
-    //If collectionId is provided, we need to iterate through the collection to get all media
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(false);
 
-    let unsaved = 0;
-
-    console.log("Options: " + JSON.stringify(options));
+    let unsavedMedia: Media[] = [];
 
     if (collectionId) {
         for await (const media of collectionIterator(collectionId === "ALL_MEDIA_AUTO_COLLECTION" ?
             getAllSavedMedia : getCollectionMedia.bind(null, collectionId))) {
-            for (const mediaItem of media) {
+            for await (const mediaItem of media) {
                 if (selectedMedia.some(m => m.id === mediaItem.id)) continue;
 
-                if (options.downloadMedia) await doDownload(mediaItem, false);
+                if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
 
-                await unsaveMedia(mediaItem.id, csrftoken);
-                unsaved++;
-                yield unsaved;
+                await unsaveMedia(mediaItem.id, csrftoken).then(() => {
+                    unsavedMedia.push(mediaItem);
+                })
+
+                yield mediaItem;
                 await waitForMe(options.waitTime);
             }
         }
 
         if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
-        return unsaved;
+        return unsavedMedia;
     }
 
-    for (const mediaItem of selectedMedia) {
-        if (options.downloadMedia) await doDownload(mediaItem, false);
+    for await (const mediaItem of selectedMedia) {
+        if (options.downloadMedia) await doDownload(mediaItem, options.includeThumbnails);
 
-        await unsaveMedia(mediaItem.id, csrftoken);
-        unsaved++;
-        yield unsaved;
+        await unsaveMedia(mediaItem.id, csrftoken).then(() => {
+            unsavedMedia.push(mediaItem);
+        });
+        yield mediaItem;
         await waitForMe(options.waitTime);
     }
     if (options.downloadMedia) chrome.downloads.setShelfEnabled(true);
-    return unsaved;
+    return unsavedMedia;
 }
 
 function waitForMe(ms: number) {
